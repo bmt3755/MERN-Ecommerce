@@ -39,17 +39,18 @@ const userSchema = new mongoose.Schema({
         default: "user"
     },
     resetPasswordToken: String,
-    reserPasswordExpire: Date
+    resetPasswordExpire: Date
+    
 })
 
 //encrypt password, check whether it had been updated or not
-userSchema.pre("save",async function(next) {
+// userSchema.pre("save",async function(next) {
 
-    if(this.isModified("password")){
-        next();
-    }
-    this.password = await bcrypt.hash(this.password,10);
-});
+//     if(this.isModified("password")){
+//         next();
+//     }
+//     this.password = await bcrypt.hash(this.password,10);
+// });
 
 //JWT token. Generate token and store in cookie
 userSchema.methods.getJWTToken = function(){
@@ -73,7 +74,13 @@ userSchema.methods.getResetPasswordToken = function(){
     //Hashing and adding to userSchema
     this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-    this.reserPasswordExpire = Date.now() + 15 * 60 * 1000;
+    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+    // const changes = { 
+    //     "resetToken": resetToken,
+    //     "resetPasswordToken": this.resetPasswordToken.toString(),
+    //     "resetPasswordExpire": this.resetPasswordExpire
+    // }
     return resetToken;
 }
 module.exports = mongoose.model("User", userSchema);
