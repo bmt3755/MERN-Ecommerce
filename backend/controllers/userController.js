@@ -155,3 +155,23 @@ exports.getUserDetails = catchAsyncErrors( async(req, res, next) => {
         user,
     })
 });
+
+//Get User Password
+exports.updatePassword = catchAsyncErrors( async(req, res, next) => {
+
+    const user = await User.findById(req.user.id).select("+password");
+
+    console.log(user);
+
+    if(user.password === req.body.oldPassword)
+    {
+        if(req.body.newPassword === req.body.confirmPassword)
+        user.password = req.body.newPassword
+        else return next(new ErrorHandler("Your confirm password did not match with new password", 400));
+    } 
+    else return next(new ErrorHandler("Your old password is wrong", 400));
+
+    await user.save();
+
+    sendToken(user, 200, res);
+});
