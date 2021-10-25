@@ -3,7 +3,7 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const User = require("../models/userModel");
 const sendToken = require("../utils/jwtToken");
 const sendEmail = require('../utils/sendEmail');
-const crypto = require("crypto");
+
 
 //Register a user
 exports.registerUser = catchAsyncErrors( async(req, res, next) => {
@@ -81,46 +81,14 @@ exports.forgotPassword = catchAsyncErrors(async(req,res,next) => {
         return next(new ErrorHandler("User not found", 404));
     }
 
-    // //Get Reset password token
-    const {resetToken,resetPasswordToken, resetPasswordExpire } = user.getResetPasswordToken();
+    //Get Reset password token
+    const resetToken = user.getResetPasswordToken();
 
-    //console.log(`resetToken: ${resetToken} \nresetPasswordToken: ${resetPasswordToken} \nresetPasswordExpire:${resetPasswordExpire}` );
-    
-
-    user.resetPasswordToken = resetPasswordToken;
-    user.resetPasswordExpire = resetPasswordExpire;
-
-    console.log(user)
-
-    // console.log(user.resetPasswordToken)
-
-    //this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-
-
-
-    //await user.save({ validateBeforeSave: false });
-    user.save((err, user) => {
-        //mailer.forgotPassword(user, host)
-        //.then((message) =>{
-            if(err) {
-                console.log(err)
-            }
-        console.log('in forgot_password', user)
-        
-        // res.json(message)
-        })
-        // .catch((error) => {
-        //     return res.status(500).send(error)
-        // })
+    await user.save({ validateBeforeSave: false });
 
     console.log(user);
 
-    // await user.updateOne({_id: req._id}, {
-    //     resetPasswordToken: resetPasswordToken,
-    //     resetPasswordExpire: resetPasswordExpire
-    // })
-
-    const resetPasswordURL = `{req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+    const resetPasswordURL = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
 
     const message = `Your password reset token is: \n\n ${resetPasswordURL} \n\nIf you have not requested this email
     then, please ignore this message`;
@@ -140,9 +108,9 @@ exports.forgotPassword = catchAsyncErrors(async(req,res,next) => {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
 
-        //await user.save({ validateBeforeSave: false });        
+        await user.save({ validateBeforeSave: false });        
 
-        return next(new ErrorHandler(error.message, 500))
+        return next(new ErrorHandler(error.message, 500));
 
     }
 });
