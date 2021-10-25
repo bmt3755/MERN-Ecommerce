@@ -44,13 +44,13 @@ const userSchema = new mongoose.Schema({
 })
 
 //encrypt password, check whether it had been updated or not
-// userSchema.pre("save",async function(next) {
+userSchema.pre("save",async function(next) {
 
-//     if(this.isModified("password")){
-//         next();
-//     }
-//     this.password = await bcrypt.hash(this.password,10);
-// });
+    if(this.isModified("password")){
+        next();
+    }
+    this.password = await bcrypt.hash(this.password,10);
+});
 
 //JWT token. Generate token and store in cookie
 userSchema.methods.getJWTToken = function(){
