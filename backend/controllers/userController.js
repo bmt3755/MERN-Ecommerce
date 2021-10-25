@@ -156,12 +156,10 @@ exports.getUserDetails = catchAsyncErrors( async(req, res, next) => {
     })
 });
 
-//Get User Password
+//Update User Password
 exports.updatePassword = catchAsyncErrors( async(req, res, next) => {
 
     const user = await User.findById(req.user.id).select("+password");
-
-    console.log(user);
 
     if(user.password === req.body.oldPassword)
     {
@@ -174,4 +172,26 @@ exports.updatePassword = catchAsyncErrors( async(req, res, next) => {
     await user.save();
 
     sendToken(user, 200, res);
+});
+
+//Update User details
+exports.updateProfile = catchAsyncErrors( async( req,res,next) => {
+
+    const newUserData = {
+        name: req.body.name,
+        email: req.body.email 
+    }
+
+   //Will add Cloudinary later
+
+    const user = await User.findByIdAndUpdate(req.user.id, newUserData,{
+            new:true,
+            runValidators:true,
+            useFindAndModify: false
+        });
+
+    res.status(200).json({
+        success: true,
+    });
+        
 });
